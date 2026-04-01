@@ -9,4 +9,7 @@ router.get('/results', drawController.getResults);
 // Trigger Draw manually (usually Admin or cron, but exposed here for testing)
 router.post('/trigger', authMiddleware, drawController.triggerDraw);
 
+// Winner Proof Submission
+router.post('/proof', authMiddleware, drawController.submitProof);
+
 module.exports = router;

@@ -19,6 +19,19 @@ class DrawController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+
+    async submitProof(req, res) {
+        try {
+            const { drawId, proofUrl } = req.body;
+            if (!drawId || !proofUrl) {
+                return res.status(400).json({ success: false, message: 'DrawId and ProofURL required' });
+            }
+            const data = await drawService.submitWinnerProof(req.user.id, drawId, proofUrl);
+            res.json({ success: true, message: 'Proof submitted', data });
+        } catch (error) {
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = new DrawController();

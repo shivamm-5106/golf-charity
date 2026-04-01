@@ -28,4 +28,7 @@ const SubscriptionSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+SubscriptionSchema.index({ userId: 1 }, { unique: true });
+SubscriptionSchema.index({ userId: 1, status: 1 });
+
 module.exports = mongoose.model('Subscription', SubscriptionSchema);

@@ -5,12 +5,20 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Subscription from './pages/Subscription';
+import Admin from './pages/Admin';
+import NotFound from './pages/NotFound';
 import useAuthStore from './store/useAuthStore';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// Admin Route Wrapper
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  return (isAuthenticated && user?.role === 'admin') ? children : <Navigate to="/dashboard" replace />;
 };
 
 function App() {
@@ -38,9 +46,17 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/admin" 
+          element={
+            <AdminRoute>
+              <Admin />
+            </AdminRoute>
+          } 
+        />
         
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

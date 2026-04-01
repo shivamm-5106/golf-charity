@@ -20,6 +20,9 @@ const DrawSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+DrawSchema.index({ month: 1 }, { unique: true });
+DrawSchema.index({ status: 1 });
+
 const WinnerSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -39,12 +42,22 @@ const WinnerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    proofUrl: {
+        type: String // To store S3 link / mocked proof
+    },
+    verificationNotes: {
+        type: String
+    },
     status: {
         type: String,
-        enum: ['pending', 'approved', 'paid'],
+        enum: ['pending', 'approved', 'rejected', 'paid'],
         default: 'pending'
     }
 }, { timestamps: true });
+
+WinnerSchema.index({ userId: 1, drawId: 1 }, { unique: true });
+WinnerSchema.index({ drawId: 1 });
+WinnerSchema.index({ status: 1 });
 
 module.exports = {
     Draw: mongoose.model('Draw', DrawSchema),

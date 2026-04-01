@@ -19,6 +19,6 @@ const ScoreSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Ensure we don't have too many scores logic happens in service,
-// but we index userId for fast fetching of all a user's scores
+ScoreSchema.index({ userId: 1, datePlayed: -1 }); // Fast FIFO + user score fetching
+
 module.exports = mongoose.model('Score', ScoreSchema);

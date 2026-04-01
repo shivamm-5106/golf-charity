@@ -1,6 +1,5 @@
 const repo = require('./repository');
-const userRepo = require('../auth/repository');
-const User = require('../auth/schema'); // For updating user
+const User = require('../auth/schema');
 
 class CharityService {
     async getCharities() {
@@ -13,14 +12,19 @@ class CharityService {
             throw new Error('Charity not found');
         }
 
-        // Update user
+        // Update user's selected charity
         const updatedUser = await User.findByIdAndUpdate(
-            userId, 
+            userId,
             { selectedCharity: charityId },
             { new: true }
         ).populate('selectedCharity', 'name');
 
-        return updatedUser.selectedCharity;
+        if (!updatedUser) {
+            throw new Error('User not found');
+        }
+
+        // Return the charity object directly (populate may return null if ref is missing)
+        return updatedUser.selectedCharity || charity;
     }
 }
 
