@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trophy, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import { useToast } from '../components/Toast';
+import { api } from '../lib/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -19,13 +20,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/v1/auth/login', {
+      const data = await api('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Login failed');
 
       setAuth(data.data.user, data.data.token);
       toast('Welcome back! 🏌️', 'success');

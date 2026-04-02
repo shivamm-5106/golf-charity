@@ -8,10 +8,16 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor:  ['react', 'react-dom', 'react-router-dom'],
-          store:   ['zustand'],
-          icons:   ['lucide-react'],
+        manualChunks(id) {
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router-dom')) {
+            return 'vendor';
+          }
+          if (id.includes('node_modules/zustand')) {
+            return 'store';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'icons';
+          }
         }
       }
     },

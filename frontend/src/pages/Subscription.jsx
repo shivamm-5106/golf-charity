@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { Check, Shield } from 'lucide-react';
+import { api, jsonAuthHeaders } from '../lib/api';
 
 export default function Subscription() {
   const [loading, setLoading] = useState(false);
@@ -14,26 +15,17 @@ export default function Subscription() {
     setError('');
     try {
       // Mock Stripe Checkout Initiation
-      const res = await fetch('http://localhost:5000/api/v1/subscription/checkout', {
+      await api('/subscription/checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: jsonAuthHeaders(token),
         body: JSON.stringify({ plan })
       });
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.message);
       
       // Simulate Stripe Success Webhook directly for UX testing purposes:
-      await fetch('http://localhost:5000/api/v1/subscription/mock-success', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ plan })
+      await api('/subscription/mock-success', {
+        method: 'POST',
+        headers: jsonAuthHeaders(token),
+        body: JSON.stringify({ plan })
       });
 
       // Redirect to dashboard explicitly assuming success

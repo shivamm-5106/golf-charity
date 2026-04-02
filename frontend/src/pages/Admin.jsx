@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../components/Toast';
 import { TableSkeleton } from '../components/Skeleton';
+import { api, authHeaders, jsonAuthHeaders } from '../lib/api';
 
 export default function Admin() {
   const { token, user, logout } = useAuthStore();
@@ -23,11 +24,9 @@ export default function Admin() {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/v1/admin/dashboard', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const data = await api('/admin/dashboard', {
+        headers: authHeaders(token)
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message);
       setStats(data.data.overview);
       setPendingWinners(data.data.pendingApprovals);
     } catch (err) {
@@ -40,13 +39,11 @@ export default function Admin() {
   const handleVerify = async (winnerId, status) => {
     setActionLoading(winnerId + status);
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/admin/verify/winner/${winnerId}`, {
+      await api(`/admin/verify/winner/${winnerId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: jsonAuthHeaders(token),
         body: JSON.stringify({ status, notes: `Manually ${status} by admin.` })
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message);
       toast(`Winner ${status} successfully.`, status === 'approved' ? 'success' : 'info');
       await fetchAdminData();
     } catch (err) {

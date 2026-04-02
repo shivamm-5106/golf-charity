@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { LogOut, User, PlusCircle, Target, Award, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from '../components/Toast';
 import { DashboardSkeleton } from '../components/Skeleton';
+import { api, authHeaders, jsonAuthHeaders } from '../lib/api';
 
 export default function Dashboard() {
   const { user, token, logout } = useAuthStore();
@@ -21,10 +22,9 @@ export default function Dashboard() {
 
   const fetchSub = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/subscription/status', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const data = await api('/subscription/status', {
+        headers: authHeaders(token)
       });
-      const data = await res.json();
       if (data.success) {
         setSubStatus(data.data.status);
         if (data.data.status === 'active') fetchDashboardData();
@@ -36,14 +36,10 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const [scoreRes, charityRes, drawRes] = await Promise.all([
-        fetch('http://localhost:5000/api/v1/score', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/v1/charity', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('http://localhost:5000/api/v1/draw/results', { headers: { 'Authorization': `Bearer ${token}` } }),
-      ]);
-
       const [scoreData, charityData, drawData] = await Promise.all([
-        scoreRes.json(), charityRes.json(), drawRes.json()
+        api('/score', { headers: authHeaders(token) }),
+        api('/charity', { headers: authHeaders(token) }),
+        api('/draw/results', { headers: authHeaders(token) }).catch(() => ({ success: false })),
       ]);
 
       if (scoreData.success)  setScores(scoreData.data);
@@ -63,13 +59,11 @@ export default function Dashboard() {
     }
     setLoadingAction(true);
     try {
-      const res = await fetch('http://localhost:5000/api/v1/score', {
+      await api('/score', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: jsonAuthHeaders(token),
         body: JSON.stringify({ value: val })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
       setScoreInput('');
       toast(`Score ${val} submitted! 🏌️`, 'success');
       fetchDashboardData();
@@ -82,13 +76,11 @@ export default function Dashboard() {
 
   const handleSelectCharity = async (charityId, charityName) => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/charity/select', {
+      await api('/charity/select', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: jsonAuthHeaders(token),
         body: JSON.stringify({ charityId })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
       toast(`Supporting "${charityName}" ❤️`, 'success');
     } catch (err) {
       toast(err.message, 'error');

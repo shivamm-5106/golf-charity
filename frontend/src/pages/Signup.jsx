@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trophy, Mail, Lock, User as UserIcon, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import { useToast } from '../components/Toast';
+import { api } from '../lib/api';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -24,13 +25,11 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/v1/auth/signup', {
+      const data = await api('/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || (data.errors?.[0]?.message) || 'Signup failed');
 
       setAuth(data.data.user, data.data.token);
       toast('Account created successfully! 🎉', 'success');
